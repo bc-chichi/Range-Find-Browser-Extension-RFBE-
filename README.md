@@ -7,8 +7,7 @@
 
 It's the perfect tool for browsing deal websites, financial reports, data tables, or any page with dense numerical information.
 
-![Range-Find Screenshot] 
-*Note: You can take a screenshot of the extension in action, name it `placeholder.png` (or anything else), and upload it to your GitHub repository to replace this image.*
+
 
 ---
 
