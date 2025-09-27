@@ -1,42 +1,63 @@
+// --- CONFIGURATION SECTION ---
+
+// Default price prefixes to automatically include in searches.
+const DEFAULT_INCLUDE_PREFIXES = ['Rs', 'rs', '₹'];
+
+// Default terms to automatically ignore, both before and after a number.
+const DEFAULT_IGNORE_TERMS = ['comments', 'comment', 'upvotes', 'upvote'];
+
+// Site-specific rules to limit the search area on certain websites.
+const siteConfigurations = {
+    'www.reddit.com': 'div[data-testid="post-comment-thread"]'
+};
+
+
 // Global variables to track state
 let highlightedElements = [];
 let currentIndex = -1;
 
-// Function to escape special regex characters from user input
-function escapeRegex(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-// Function to create the search regex dynamically
+// Function to create the search regex dynamically, now with built-in defaults
 function createNumberRegex(includeList, ignoreList) {
-    let numberPattern = `\\$?\\s?\\b\\d{1,3}(?:,?\\d{3})*(?:\\.\\d+)?\\b`;
+    // --- NEW LOGIC: MERGE USER INPUT WITH DEFAULTS ---
+    const userIncludeTerms = includeList ? includeList.split(',').map(term => term.trim()).filter(Boolean) : [];
+    const allIncludeTerms = [...new Set([...DEFAULT_INCLUDE_PREFIXES, ...userIncludeTerms])];
+
+    const userIgnoreTerms = ignoreList ? ignoreList.split(',').map(term => term.trim()).filter(Boolean) : [];
+    const allIgnoreTerms = [...new Set([...DEFAULT_IGNORE_TERMS, ...userIgnoreTerms])];
+    // --- END OF NEW LOGIC ---
+
+    let numberPattern = `\\b\\d{1,3}(?:,?\\d{3})*(?:\\.\\d+)?\\b`;
     let prefixPattern = '';
     let suffixPattern = '';
 
-    // Process the include list for required prefixes
-    if (includeList && includeList.trim() !== "") {
-        const includeTerms = includeList.split(',').map(term => escapeRegex(term.trim())).filter(Boolean);
-        const includePattern = includeTerms.join('|');
-        // (?<=...) - Positive Lookbehind: Must be preceded by these symbols, followed by optional space(s)
+    // Process the include list for required prefixes (takes priority)
+    const processedInclude = allIncludeTerms.map(term => escapeRegex(term)).filter(Boolean);
+    if (processedInclude.length > 0) {
+        const includePattern = processedInclude.join('|');
         prefixPattern = `(?<=(?:${includePattern})\\s*)`;
-        
-        // --- THIS IS THE FIX ---
-        // The number pattern should NOT look for a space, as the prefix pattern already handles it.
-        numberPattern = `\\b\\d{1,3}(?:,?\\d{3})*(?:\\.\\d+)?\\b`;
+    } 
+    // If not using an include list, process the ignore list for prefixes to AVOID
+    else {
+        const processedIgnore = allIgnoreTerms.map(term => escapeRegex(term)).filter(Boolean);
+        if (processedIgnore.length > 0) {
+            const ignorePattern = processedIgnore.join('|');
+            // Negative Lookbehind: Must NOT be preceded by these symbols
+            prefixPattern = `(?<!(?:${ignorePattern}|\\$|@)\\s*)`;
+        }
     }
 
-    // Process the ignore list for suffixes to exclude
-    if (ignoreList && ignoreList.trim() !== "") {
-        const ignoreTerms = ignoreList.split(',').map(term => escapeRegex(term.trim())).filter(Boolean);
-        const ignorePattern = ignoreTerms.join('|');
-        // (?!...) - Negative Lookahead: Must not be followed by these symbols
+    // Process the ignore list for suffixes to AVOID
+    const processedIgnoreSuffix = allIgnoreTerms.map(term => escapeRegex(term)).filter(Boolean);
+    if (processedIgnoreSuffix.length > 0) {
+        const ignorePattern = processedIgnoreSuffix.join('|');
+        // Negative Lookahead: Must NOT be followed by these symbols
         suffixPattern = `(?!\\s*(?:${ignorePattern}))`;
     }
     
     // Combine them into a final regex
     const finalRegexPattern = `${prefixPattern}${numberPattern}${suffixPattern}`;
     
-    return new RegExp(finalRegexPattern, 'g');
+    return new RegExp(finalRegexPattern, 'gi');
 }
 
 
@@ -44,12 +65,22 @@ function createNumberRegex(includeList, ignoreList) {
 function findAndHighlight(searchTerm, min, max, includeList, ignoreList) {
     clearHighlights();
 
+    const currentHostname = window.location.hostname;
+    let searchRoot = document.body; 
+
+    if (siteConfigurations[currentHostname]) {
+        const specificElement = document.querySelector(siteConfigurations[currentHostname]);
+        if (specificElement) {
+            searchRoot = specificElement;
+        }
+    }
+
     const matchesToProcess = [];
     const isRangeSearch = min !== null && max !== null;
     const textSearchRegex = searchTerm ? new RegExp(searchTerm, 'gi') : null;
     const numberRegex = isRangeSearch ? createNumberRegex(includeList, ignoreList) : null;
 
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+    const walker = document.createTreeWalker(searchRoot, NodeFilter.SHOW_TEXT, null, false);
     let node;
 
     // PASS 1: FIND ALL MATCHES
@@ -107,7 +138,11 @@ function findAndHighlight(searchTerm, min, max, includeList, ignoreList) {
 }
 
 
-// --- UTILITY AND NAVIGATION FUNCTIONS (UNCHANGED) ---
+// --- UTILITY AND OTHER FUNCTIONS (UNCHANGED) ---
+
+function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 function clearHighlights() {
     highlightedElements.forEach(element => {
