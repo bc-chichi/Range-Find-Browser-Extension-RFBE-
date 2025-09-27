@@ -27,14 +27,14 @@ It's the perfect tool for browsing deal websites, financial reports, data tables
 Since this extension is not yet on the official Web Store, you can easily load it yourself in just a few steps:
 
 1.  **Download the Code:** Click the green **`< > Code`** button on this GitHub page and select **"Download ZIP"**.
-2.  **Unzip the File:** Extract the contents of the ZIP file into a folder on your computer. You should have a folder containing files like `manifest.json`, `popup.html`, etc.
+2.  **Unzip the File:** Extract the contents of the ZIP file into a folder (name the folder as Range Find) on your computer. You should have a folder containing files like `manifest.json`, `popup.html`, etc.
 3.  **Open Browser Extensions:** Open your browser (Chrome, Edge, Brave) and navigate to the extensions management page. You can usually find this at `chrome://extensions` or `edge://extensions`.
 4.  **Enable Developer Mode:** Find the "Developer mode" toggle (usually in the top-right corner) and make sure it's turned **ON**.
 5.  **Load the Extension:** Click the **"Load unpacked"** button. A file dialog will open. Select the entire folder you unzipped in Step 2.
 
 The **Range-Find** extension icon will now appear in your browser's toolbar, ready to use!
 
-[Image of Chrome extensions page with developer mode enabled]
+
 
 ---
 
