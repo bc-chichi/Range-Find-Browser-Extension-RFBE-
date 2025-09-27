@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Range-Find</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Range-Find</h2>
+        
+        <div class="form-group">
+            <label for="search-input">Find Text</label>
+            <input type="text" id="search-input" placeholder="e.g., product">
+        </div>
+
+        <div class="form-group">
+            <label>Find Numbers Between</label>
+            <div class="range-inputs">
+                <input type="number" id="min-input" placeholder="Min">
+                <span>and</span>
+                <input type="number" id="max-input" placeholder="Max">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="include-input">Include List (e.g., $, @, ₹)</label>
+            <input type="text" id="include-input" placeholder="Only find numbers with these prefixes">
+        </div>
+
+        <div class="form-group">
+            <label for="ignore-input">Ignore List (e.g., %, g, ml)</label>
+            <input type="text" id="ignore-input" placeholder="Exclude numbers next to these">
+        </div>
+
+        <div class="button-group">
+            <button id="find-btn">Find</button>
+            <button id="clear-btn">Clear Highlights</button>
+        </div>
+
+        <div class="nav-group">
+            <button id="prev-btn">◀</button>
+            <span id="counter">0 / 0</span>
+            <button id="next-btn">▶</button>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

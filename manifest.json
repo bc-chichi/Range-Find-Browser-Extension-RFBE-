@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Range-Find",
+  "version": "1.0",
+  "description": "Advanced find tool to search for text and number ranges on a page.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "128": "icon.png"
+  }
+}
